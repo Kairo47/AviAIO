@@ -28,6 +28,15 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def _embed(self, color, ctx):
+        embed = discord.Embed(color=color)
+        embed.set_author(name="◈ ASTRA", icon_url=self.bot.user.display_avatar.url)
+        embed.set_footer(
+            text=f"{ctx.author.name} • Thank you for using Astra",
+            icon_url=ctx.author.display_avatar.url
+        )
+        return embed
+
     # ── Unlock All ───────────────────────────────────────────────────────────
 
     @commands.command(name="unlockall", aliases=["ua"], help="Unlocks all channels in the server.", usage="unlockall")
@@ -36,8 +45,9 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     async def unlockall(self, ctx, *, reason=None):
-        msg = await ctx.reply(embed=discord.Embed(color=0x2f3136,
-            description="<a:loading:1002226340516331571> | Unlocking all channels..."), mention_author=False)
+        loading = self._embed(0x004D00, ctx)
+        loading.description = "<a:loading:1002226340516331571> | Unlocking all channels..."
+        msg = await ctx.reply(embed=loading, mention_author=False)
         for channel in ctx.guild.channels:
             try:
                 await channel.set_permissions(ctx.guild.default_role,
@@ -45,8 +55,9 @@ class Moderation(commands.Cog):
                     reason=reason)
             except Exception:
                 pass
-        await msg.edit(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | All channels have been unlocked."))
+        done = self._embed(0x004D00, ctx)
+        done.description = "<:GreenTick:1526084976758493254> | All channels have been unlocked."
+        await msg.edit(embed=done)
 
     # ── Lock All ─────────────────────────────────────────────────────────────
 
@@ -56,8 +67,9 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     @commands.cooldown(1, 10, commands.BucketType.guild)
     async def lockall(self, ctx, *, reason=None):
-        msg = await ctx.reply(embed=discord.Embed(color=0x2f3136,
-            description="<a:loading:1002226340516331571> | Locking all channels..."), mention_author=False)
+        loading = self._embed(0x5C0A0A, ctx)
+        loading.description = "<a:loading:1002226340516331571> | Locking all channels..."
+        msg = await ctx.reply(embed=loading, mention_author=False)
         for channel in ctx.guild.channels:
             try:
                 await channel.set_permissions(ctx.guild.default_role,
@@ -65,8 +77,9 @@ class Moderation(commands.Cog):
                     reason=reason)
             except Exception:
                 pass
-        await msg.edit(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | All channels have been locked."))
+        done = self._embed(0x5C0A0A, ctx)
+        done.description = "<:GreenTick:1526084976758493254> | All channels have been locked."
+        await msg.edit(embed=done)
 
     # ── Give (Add Role) ──────────────────────────────────────────────────────
 
@@ -76,16 +89,16 @@ class Moderation(commands.Cog):
     @commands.has_permissions(administrator=True)
     async def give(self, ctx, member: discord.Member, role: discord.Role):
         if role >= ctx.author.top_role and ctx.author != ctx.guild.owner:
-            return await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | That role is above or equal to your top role."))
+            embed = self._embed(0x003366, ctx)
+            embed.description = "<:a_error:1526134515578179584> | That role is above or equal to your top role."
+            return await ctx.send(embed=embed)
         if role >= ctx.guild.me.top_role:
-            return await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | That role is above my top role."))
+            embed = self._embed(0x003366, ctx)
+            embed.description = "<:a_error:1526134515578179584> | That role is above my top role."
+            return await ctx.send(embed=embed)
         await member.add_roles(role, reason=f"Role added by {ctx.author}")
-        embed = discord.Embed(color=0x2f3136)
-        embed.set_author(name=f"Role given to {member.name}")
-        embed.add_field(name="Added", value=f"{role.mention} → {member.mention}")
-        embed.set_footer(text=f"By {ctx.author}", icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x003366, ctx)
+        embed.add_field(name="Role Given", value=f"{role.mention} → {member.mention}", inline=False)
         await ctx.send(embed=embed)
 
     # ── Hide All ─────────────────────────────────────────────────────────────
@@ -95,15 +108,17 @@ class Moderation(commands.Cog):
     @ignore_check()
     @commands.has_permissions(manage_channels=True)
     async def hideall(self, ctx):
-        msg = await ctx.reply(embed=discord.Embed(color=0x2f3136,
-            description="<a:loading:1002226340516331571> | Hiding all channels..."), mention_author=False)
+        loading = self._embed(0x1A001A, ctx)
+        loading.description = "<a:loading:1002226340516331571> | Hiding all channels..."
+        msg = await ctx.reply(embed=loading, mention_author=False)
         for channel in ctx.guild.channels:
             try:
                 await channel.set_permissions(ctx.guild.default_role, view_channel=False)
             except Exception:
                 pass
-        await msg.edit(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | All channels have been hidden."))
+        done = self._embed(0x1A001A, ctx)
+        done.description = "<:GreenTick:1526084976758493254> | All channels have been hidden."
+        await msg.edit(embed=done)
 
     # ── Unhide All ───────────────────────────────────────────────────────────
 
@@ -112,15 +127,17 @@ class Moderation(commands.Cog):
     @ignore_check()
     @commands.has_permissions(manage_channels=True)
     async def unhideall(self, ctx):
-        msg = await ctx.reply(embed=discord.Embed(color=0x2f3136,
-            description="<a:loading:1002226340516331571> | Unhiding all channels..."), mention_author=False)
+        loading = self._embed(0x00334D, ctx)
+        loading.description = "<a:loading:1002226340516331571> | Unhiding all channels..."
+        msg = await ctx.reply(embed=loading, mention_author=False)
         for channel in ctx.guild.channels:
             try:
                 await channel.set_permissions(ctx.guild.default_role, view_channel=True)
             except Exception:
                 pass
-        await msg.edit(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | All channels have been unhidden."))
+        done = self._embed(0x00334D, ctx)
+        done.description = "<:GreenTick:1526084976758493254> | All channels have been unhidden."
+        await msg.edit(embed=done)
 
     # ── Hide ─────────────────────────────────────────────────────────────────
 
@@ -136,9 +153,8 @@ class Moderation(commands.Cog):
         overwrite.view_channel = False
         await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite,
                                       reason=f"Hidden by {ctx.author}")
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Hidden {channel.mention}.")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x2D0033, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Hidden {channel.mention}."
         await ctx.reply(embed=embed)
 
     # ── Unhide ───────────────────────────────────────────────────────────────
@@ -155,9 +171,8 @@ class Moderation(commands.Cog):
         overwrite.view_channel = True
         await channel.set_permissions(ctx.guild.default_role, overwrite=overwrite,
                                       reason=f"Unhidden by {ctx.author}")
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Unhidden {channel.mention}.")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x003333, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Unhidden {channel.mention}."
         await ctx.reply(embed=embed)
 
     # ── Prefix ───────────────────────────────────────────────────────────────
@@ -171,15 +186,16 @@ class Moderation(commands.Cog):
     @commands.guild_only()
     async def prefix(self, ctx, new_prefix: str):
         if len(new_prefix) > 5:
-            return await ctx.reply(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | Prefix can't be longer than 5 characters."), mention_author=False)
+            embed = self._embed(0x331A00, ctx)
+            embed.description = "<:a_error:1526134515578179584> | Prefix can't be longer than 5 characters."
+            return await ctx.reply(embed=embed, mention_author=False)
         data = getConfig(ctx.guild.id)
         old = data.get("prefix", "-")
         data["prefix"] = new_prefix
         updateConfig(ctx.guild.id, data)
-        await ctx.reply(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Prefix changed: `{old}` → `{new_prefix}`"),
-            mention_author=False)
+        embed = self._embed(0x331A00, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Prefix changed: `{old}` → `{new_prefix}`"
+        await ctx.reply(embed=embed, mention_author=False)
 
     # ── Softban ──────────────────────────────────────────────────────────────
 
@@ -194,9 +210,8 @@ class Moderation(commands.Cog):
         reason = reason or f"Softbanned by {ctx.author}"
         await member.ban(reason=reason, delete_message_days=7)
         await ctx.guild.unban(member, reason=reason)
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Softbanned {member.mention}.\n**Reason:** {reason}")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x4D0000, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Softbanned {member.mention}.\n**Reason:** {reason}"
         await ctx.send(embed=embed)
 
     # ── Purge ────────────────────────────────────────────────────────────────
@@ -293,17 +308,18 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, member: discord.Member, duration: str):
         if member.guild_permissions.administrator:
-            return await ctx.reply(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | Can't mute an administrator."))
+            embed = self._embed(0x0A0A3D, ctx)
+            embed.description = "<:a_error:1526134515578179584> | Can't mute an administrator."
+            return await ctx.reply(embed=embed)
         seconds = parse_time(duration)
         if seconds <= 0:
-            return await ctx.reply(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | Invalid duration. Examples: `10m`, `2h`, `1d`"))
+            embed = self._embed(0x0A0A3D, ctx)
+            embed.description = "<:a_error:1526134515578179584> | Invalid duration. Examples: `10m`, `2h`, `1d`"
+            return await ctx.reply(embed=embed)
         until = discord.utils.utcnow() + datetime.timedelta(seconds=seconds)
         await member.timeout(until, reason=f"Muted by {ctx.author}")
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Muted {member.mention} for **{duration}**.")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x0A0A3D, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Muted {member.mention} for **{duration}**."
         await ctx.send(embed=embed)
 
     # ── Kick ─────────────────────────────────────────────────────────────────
@@ -317,18 +333,18 @@ class Moderation(commands.Cog):
         if member == ctx.guild.me:
             return await ctx.send("You can't kick me!")
         if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
-            return await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | You can't kick someone with a higher or equal role."))
+            embed = self._embed(0x4D1A00, ctx)
+            embed.description = "<:a_error:1526134515578179584> | You can't kick someone with a higher or equal role."
+            return await ctx.send(embed=embed)
         reason = reason or "No reason provided"
         try:
-            await member.send(embed=discord.Embed(color=0x2f3136,
+            await member.send(embed=discord.Embed(color=0x4D1A00,
                 description=f":exclamation: You were kicked from **{ctx.guild.name}**.\n**Reason:** {reason}"))
         except Exception:
             pass
         await member.kick(reason=reason)
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Kicked **{member}**.\n**Reason:** {reason}")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x4D1A00, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Kicked **{member}**.\n**Reason:** {reason}"
         await ctx.send(embed=embed)
 
     # ── Warn ─────────────────────────────────────────────────────────────────
@@ -339,12 +355,11 @@ class Moderation(commands.Cog):
     @ignore_check()
     @commands.has_permissions(kick_members=True)
     async def warn(self, ctx, member: discord.Member, *, reason="No reason provided"):
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | **{member.display_name}** has been warned.\n**Reason:** {reason}")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x4D3300, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | **{member.display_name}** has been warned.\n**Reason:** {reason}"
         await ctx.send(embed=embed)
         try:
-            await member.send(embed=discord.Embed(color=0x886ad1,
+            await member.send(embed=discord.Embed(color=0x4D3300,
                 description=f":exclamation: You were warned in **{ctx.guild.name}**.\n**Reason:** {reason}"))
         except Exception:
             pass
@@ -360,18 +375,18 @@ class Moderation(commands.Cog):
         if member == ctx.guild.me:
             return await ctx.send("You can't ban me!")
         if ctx.author.top_role <= member.top_role and ctx.author != ctx.guild.owner:
-            return await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | You can't ban someone with a higher or equal role."))
+            embed = self._embed(0x3D0014, ctx)
+            embed.description = "<:a_error:1526134515578179584> | You can't ban someone with a higher or equal role."
+            return await ctx.send(embed=embed)
         reason = reason or "No reason provided"
         try:
-            await member.send(embed=discord.Embed(color=0x2f3136,
+            await member.send(embed=discord.Embed(color=0x3D0014,
                 description=f":exclamation: You were banned from **{ctx.guild.name}**.\n**Reason:** {reason}"))
         except Exception:
             pass
         await member.ban(reason=reason)
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Banned **{member}**.\n**Reason:** {reason}")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x3D0014, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Banned **{member}**.\n**Reason:** {reason}"
         await ctx.send(embed=embed)
 
     # ── Unban ────────────────────────────────────────────────────────────────
@@ -384,13 +399,13 @@ class Moderation(commands.Cog):
         try:
             user = await self.bot.fetch_user(user_id)
             await ctx.guild.unban(user)
-            embed = discord.Embed(color=0x2f3136,
-                description=f"<:GreenTick:1526084976758493254> | Unbanned **{user}**.")
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+            embed = self._embed(0x003D00, ctx)
+            embed.description = f"<:GreenTick:1526084976758493254> | Unbanned **{user}**."
             await ctx.send(embed=embed)
         except discord.NotFound:
-            await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | User not found or not banned."))
+            embed = self._embed(0x003D00, ctx)
+            embed.description = "<:a_error:1526134515578179584> | User not found or not banned."
+            await ctx.send(embed=embed)
 
     # ── Clone ────────────────────────────────────────────────────────────────
 
@@ -401,9 +416,8 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_channels=True)
     async def clone(self, ctx, channel: discord.TextChannel):
         await channel.clone()
-        embed = discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Cloned **{channel.name}**.")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+        embed = self._embed(0x00003D, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Cloned **{channel.name}**."
         await ctx.send(embed=embed)
 
     # ── Lock ─────────────────────────────────────────────────────────────────
@@ -418,8 +432,9 @@ class Moderation(commands.Cog):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role,
             overwrite=discord.PermissionOverwrite(send_messages=False), reason=reason)
-        await ctx.send(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Locked {channel.mention}."))
+        embed = self._embed(0x3D003D, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Locked {channel.mention}."
+        await ctx.send(embed=embed)
 
     # ── Unlock ───────────────────────────────────────────────────────────────
 
@@ -433,8 +448,9 @@ class Moderation(commands.Cog):
         channel = channel or ctx.channel
         await channel.set_permissions(ctx.guild.default_role,
             overwrite=discord.PermissionOverwrite(send_messages=True), reason=reason)
-        await ctx.send(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Unlocked {channel.mention}."))
+        embed = self._embed(0x003D3D, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Unlocked {channel.mention}."
+        await ctx.send(embed=embed)
 
     # ── Slowmode ─────────────────────────────────────────────────────────────
 
@@ -446,11 +462,14 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def slowmode(self, ctx, seconds: int):
         if seconds > 21600:
-            return await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description="<a:error:1002226340516331571> | Slowmode max is 21600 seconds (6 hours)."))
+            embed = self._embed(0x1A0033, ctx)
+            embed.description = "<:a_error:1526134515578179584> | Slowmode max is 21600 seconds (6 hours)."
+            return await ctx.send(embed=embed)
         await ctx.channel.edit(slowmode_delay=seconds)
         msg = "Slowmode disabled." if seconds == 0 else f"Slowmode set to **{seconds}s**."
-        await ctx.send(embed=discord.Embed(color=0x2f3136, description=f"<:GreenTick:1526084976758493254> | {msg}"))
+        embed = self._embed(0x1A0033, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | {msg}"
+        await ctx.send(embed=embed)
 
     # ── Remove Slowmode ──────────────────────────────────────────────────────
 
@@ -462,5 +481,6 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def rslowmode(self, ctx):
         await ctx.channel.edit(slowmode_delay=0)
-        await ctx.send(embed=discord.Embed(color=0x2f3136,
-            description="<:GreenTick:1526084976758493254> | Slowmode removed."))
+        embed = self._embed(0x330033, ctx)
+        embed.description = "<:GreenTick:1526084976758493254> | Slowmode removed."
+        await ctx.send(embed=embed)

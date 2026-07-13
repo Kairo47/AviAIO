@@ -16,6 +16,15 @@ class Utility(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    def _embed(self, color, ctx):
+        embed = discord.Embed(color=color)
+        embed.set_author(name="◈ ASTRA", icon_url=self.bot.user.display_avatar.url)
+        embed.set_footer(
+            text=f"{ctx.author.name} • Thank you for using Astra",
+            icon_url=ctx.author.display_avatar.url
+        )
+        return embed
+
     # ── Ping ─────────────────────────────────────────────────────────────────
 
     @commands.hybrid_command(name="ping", aliases=["latency"], help="Shows the bot's latency.", usage="ping")
@@ -23,8 +32,8 @@ class Utility(commands.Cog):
     @ignore_check()
     async def ping(self, ctx):
         latency = round(self.bot.latency * 1000, 2)
-        embed = discord.Embed(color=0x2f3136,
-            description=f"🏓 Pong! `{latency} ms`")
+        embed = self._embed(0x0D0D3D, ctx)
+        embed.description = f"🏓 Pong! `{latency} ms`"
         await ctx.send(embed=embed)
 
     # ── Stats ────────────────────────────────────────────────────────────────
@@ -33,11 +42,10 @@ class Utility(commands.Cog):
     @blacklist_check()
     @ignore_check()
     async def stats(self, ctx):
-        server_count = len(self.bot.guilds)
+        server_count  = len(self.bot.guilds)
         total_members = sum(g.member_count for g in self.bot.guilds if g.member_count)
-        uptime = str(datetime.timedelta(seconds=int(round(time.time() - start_time))))
+        uptime        = str(datetime.timedelta(seconds=int(round(time.time() - start_time))))
 
-        # Fetch owner mentions (deduplicated)
         dev_lines = []
         seen = set()
         for uid in OWNER_IDS:
@@ -50,15 +58,12 @@ class Utility(commands.Cog):
                     dev_lines.append(f"<@{uid}>")
         devs_value = "\n".join(dev_lines) if dev_lines else "Unknown"
 
-        embed = discord.Embed(color=0x2f3136)
-        embed.set_author(name=f"{self.bot.user.name} Stats", icon_url=self.bot.user.display_avatar.url)
-        embed.set_thumbnail(url=self.bot.user.display_avatar.url)
-        embed.add_field(name="﹒SERVERS",    value=f"```{server_count}```",                         inline=True)
-        embed.add_field(name="﹒USERS",      value=f"```{total_members}```",                        inline=True)
-        embed.add_field(name="﹒PING",       value=f"```{round(self.bot.latency*1000,2)} ms```",    inline=True)
-        embed.add_field(name="﹒UPTIME",     value=f"```{uptime}```",                               inline=True)
-        embed.add_field(name="﹒DEVELOPERS", value=devs_value,                                      inline=False)
-        embed.set_footer(text="avi.ae", icon_url=self.bot.user.display_avatar.url)
+        embed = self._embed(0x2D1B69, ctx)
+        embed.add_field(name="﹒SERVERS",    value=f"```{server_count}```",                       inline=True)
+        embed.add_field(name="﹒USERS",      value=f"```{total_members}```",                      inline=True)
+        embed.add_field(name="﹒PING",       value=f"```{round(self.bot.latency*1000,2)} ms```",  inline=True)
+        embed.add_field(name="﹒UPTIME",     value=f"```{uptime}```",                             inline=True)
+        embed.add_field(name="﹒DEVELOPERS", value=devs_value, inline=False)
         await ctx.send(embed=embed)
 
     # ── Server Info ──────────────────────────────────────────────────────────
@@ -69,26 +74,24 @@ class Utility(commands.Cog):
     @ignore_check()
     @commands.guild_only()
     async def serverinfo(self, ctx: commands.Context):
-        guild = ctx.guild
-        c_at = int(guild.created_at.timestamp())
+        guild  = ctx.guild
+        c_at   = int(guild.created_at.timestamp())
         humans = len([m for m in guild.members if not m.bot])
         bots   = len([m for m in guild.members if m.bot])
 
-        nsfw_map = {"default": "Default", "explicit": "Explicit", "safe": "Safe", "age_restricted": "Age Restricted"}
+        nsfw_map   = {"default": "Default", "explicit": "Explicit", "safe": "Safe", "age_restricted": "Age Restricted"}
         nsfw_level = nsfw_map.get(guild.nsfw_level.name, "Unknown")
 
-        embed = discord.Embed(color=0x2f3136)
+        embed = self._embed(0x003D1A, ctx)
         embed.set_author(
-            name=f"{guild.name} — Server Info",
-            icon_url=guild.icon.url if guild.icon else guild.me.display_avatar.url
+            name="◈ ASTRA",
+            icon_url=self.bot.user.display_avatar.url
         )
+        embed.title = f"{guild.name} — Server Info"
         if guild.icon:
             embed.set_thumbnail(url=guild.icon.url)
         if guild.banner:
             embed.set_image(url=guild.banner.url)
-        embed.timestamp = discord.utils.utcnow()
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
-
         embed.add_field(name="__About__", inline=False, value=(
             f"**Name:** {guild.name}\n"
             f"**ID:** {guild.id}\n"
@@ -133,7 +136,7 @@ class Utility(commands.Cog):
             member = await self.bot.fetch_user(member.id)
 
         badges = ""
-        flags = member.public_flags
+        flags  = member.public_flags
         if flags.hypesquad_balance:        badges += "<:balance:1059415997729226793> "
         if flags.hypesquad_bravery:        badges += "<:bravery:1059416107733221386> "
         if flags.hypesquad_brilliance:     badges += "<:brilliance:1059416199605272587> "
@@ -145,20 +148,18 @@ class Utility(commands.Cog):
         if not badges:                     badges = "None"
 
         bannerUser = await self.bot.fetch_user(member.id)
-        embed = discord.Embed(color=0x2f3136)
-        embed.set_author(name=f"{member.name}'s Info", icon_url=member.display_avatar.url)
+        embed = self._embed(0x1A0D26, ctx)
         embed.set_thumbnail(url=member.display_avatar.url)
         if bannerUser.banner:
             embed.set_image(url=bannerUser.banner.url)
-        embed.timestamp = discord.utils.utcnow()
 
         created = f"<t:{round(member.created_at.timestamp())}:R>"
-        joined = "N/A"
-        nick = "None"
+        joined  = "N/A"
+        nick    = "None"
 
         if isinstance(member, discord.Member) and member in ctx.guild.members:
             joined = f"<t:{round(member.joined_at.timestamp())}:R>"
-            nick = member.nick or "None"
+            nick   = member.nick or "None"
 
         embed.add_field(name="__General__", inline=False, value=(
             f"**Name:** {member}\n"
@@ -178,15 +179,13 @@ class Utility(commands.Cog):
                 f"**Top Role:** {member.top_role.mention}\n"
                 f"**Roles:** {roles}"
             ))
-
             if isinstance(member, discord.Member):
-                if member == ctx.guild.owner:       ack = "Server Owner"
-                elif member.guild_permissions.administrator: ack = "Server Admin"
+                if member == ctx.guild.owner:                                                  ack = "Server Owner"
+                elif member.guild_permissions.administrator:                                   ack = "Server Admin"
                 elif member.guild_permissions.ban_members or member.guild_permissions.kick_members: ack = "Server Moderator"
-                else:                               ack = "Server Member"
+                else:                                                                          ack = "Server Member"
                 embed.add_field(name="__Acknowledgement__", value=ack, inline=False)
 
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
         await ctx.send(embed=embed)
 
     # ── Role Info ────────────────────────────────────────────────────────────
@@ -198,13 +197,18 @@ class Utility(commands.Cog):
     async def roleinfo(self, ctx, *, role: discord.Role):
         perms = [p.upper() for p, allowed in iter(role.permissions) if allowed]
         embed = discord.Embed(title=f"@{role.name}", color=role.color)
-        embed.add_field(name="ID",           value=str(role.id),             inline=True)
-        embed.add_field(name="Color",        value=str(role.color).upper(),  inline=True)
-        embed.add_field(name="Members",      value=str(len(role.members)),   inline=True)
-        embed.add_field(name="Mentionable",  value=str(role.mentionable),    inline=True)
-        embed.add_field(name="Hoisted",      value=str(role.hoist),          inline=True)
-        embed.add_field(name="Mention",      value=role.mention,             inline=True)
-        embed.add_field(name="Created",      value=role.created_at.strftime("%d/%m/%Y"), inline=True)
+        embed.set_author(name="◈ ASTRA", icon_url=self.bot.user.display_avatar.url)
+        embed.set_footer(
+            text=f"{ctx.author.name} • Thank you for using Astra",
+            icon_url=ctx.author.display_avatar.url
+        )
+        embed.add_field(name="ID",          value=str(role.id),             inline=True)
+        embed.add_field(name="Color",       value=str(role.color).upper(),  inline=True)
+        embed.add_field(name="Members",     value=str(len(role.members)),   inline=True)
+        embed.add_field(name="Mentionable", value=str(role.mentionable),    inline=True)
+        embed.add_field(name="Hoisted",     value=str(role.hoist),          inline=True)
+        embed.add_field(name="Mention",     value=role.mention,             inline=True)
+        embed.add_field(name="Created",     value=role.created_at.strftime("%d/%m/%Y"), inline=True)
         if perms:
             embed.add_field(name="Permissions", value=" ".join(f"`{p}`" for p in perms[:15]), inline=False)
         if role.icon and isinstance(role.icon, discord.Asset):
@@ -220,22 +224,26 @@ class Utility(commands.Cog):
     @commands.has_permissions(manage_emojis=True)
     async def steal(self, ctx, emote: str):
         if not emote.startswith("<"):
-            return await ctx.send(embed=discord.Embed(color=0x2f3136, description="Invalid emoji. Use a custom emoji."))
+            embed = self._embed(0x3D1A00, ctx)
+            embed.description = "<:a_error:1526134515578179584> | Invalid emoji. Use a custom emoji."
+            return await ctx.send(embed=embed)
         try:
-            parts = emote.split(":")
-            name = parts[1]
+            parts    = emote.split(":")
+            name     = parts[1]
             emoji_id = parts[2][:-1]
             animated = emote.startswith("<a")
-            ext = "gif" if animated else "png"
-            url = f"https://cdn.discordapp.com/emojis/{emoji_id}.{ext}"
+            ext      = "gif" if animated else "png"
+            url      = f"https://cdn.discordapp.com/emojis/{emoji_id}.{ext}"
             response = requests.get(url)
-            img = response.content
+            img      = response.content
             new_emoji = await ctx.guild.create_custom_emoji(name=name, image=img)
-            await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description=f"<:GreenTick:1526084976758493254> | Added **`{new_emoji}`**!"))
+            embed = self._embed(0x3D1A00, ctx)
+            embed.description = f"<:GreenTick:1526084976758493254> | Added **`{new_emoji}`**!"
+            await ctx.send(embed=embed)
         except Exception as e:
-            await ctx.send(embed=discord.Embed(color=0x2f3136,
-                description=f"<a:error:1002226340516331571> | Failed to add emoji: `{e}`"))
+            embed = self._embed(0x3D1A00, ctx)
+            embed.description = f"<:a_error:1526134515578179584> | Failed to add emoji: `{e}`"
+            await ctx.send(embed=embed)
 
     # ── Remove Emoji ─────────────────────────────────────────────────────────
 
@@ -247,8 +255,9 @@ class Utility(commands.Cog):
     async def removeemoji(self, ctx, emoji: discord.Emoji):
         name = emoji.name
         await emoji.delete()
-        await ctx.send(embed=discord.Embed(color=0x2f3136,
-            description=f"<:GreenTick:1526084976758493254> | Removed emoji **`{name}`**."))
+        embed = self._embed(0x001A3D, ctx)
+        embed.description = f"<:GreenTick:1526084976758493254> | Removed emoji **`{name}`**."
+        await ctx.send(embed=embed)
 
     # ── Unban All ────────────────────────────────────────────────────────────
 
@@ -262,7 +271,7 @@ class Utility(commands.Cog):
     async def unbanall(self, ctx):
         yes_btn = discord.ui.Button(label="Yes", style=discord.ButtonStyle.green, emoji="✅")
         no_btn  = discord.ui.Button(label="No",  style=discord.ButtonStyle.red,   emoji="❌")
-        view = discord.ui.View()
+        view    = discord.ui.View()
         view.add_item(yes_btn)
         view.add_item(no_btn)
 
@@ -284,7 +293,8 @@ class Utility(commands.Cog):
         yes_btn.callback = yes_callback
         no_btn.callback  = no_callback
 
-        embed = discord.Embed(color=0x2f3136, description="**Are you sure you want to unban everyone?**")
+        embed = self._embed(0x2D0019, ctx)
+        embed.description = "**Are you sure you want to unban everyone?**"
         await ctx.reply(embed=embed, view=view, mention_author=False)
 
     # ── Channel Info ─────────────────────────────────────────────────────────
@@ -297,14 +307,14 @@ class Utility(commands.Cog):
     async def channelinfo(self, ctx, channel: Optional[discord.TextChannel] = None):
         channel = channel or ctx.channel
         created = int(channel.created_at.timestamp())
-        embed = discord.Embed(color=0x2f3136, title=f"#{channel.name}")
-        embed.add_field(name="ID",         value=str(channel.id),                    inline=True)
-        embed.add_field(name="Type",       value=str(channel.type).title(),           inline=True)
-        embed.add_field(name="Category",   value=channel.category.name if channel.category else "None", inline=True)
-        embed.add_field(name="Created",    value=f"<t:{created}:R>",                 inline=True)
-        embed.add_field(name="Slowmode",   value=f"{channel.slowmode_delay}s",        inline=True)
-        embed.add_field(name="NSFW",       value=str(channel.is_nsfw()),             inline=True)
+        embed   = self._embed(0x003D2D, ctx)
+        embed.title = f"#{channel.name}"
+        embed.add_field(name="ID",       value=str(channel.id),                                   inline=True)
+        embed.add_field(name="Type",     value=str(channel.type).title(),                          inline=True)
+        embed.add_field(name="Category", value=channel.category.name if channel.category else "None", inline=True)
+        embed.add_field(name="Created",  value=f"<t:{created}:R>",                                inline=True)
+        embed.add_field(name="Slowmode", value=f"{channel.slowmode_delay}s",                       inline=True)
+        embed.add_field(name="NSFW",     value=str(channel.is_nsfw()),                            inline=True)
         if channel.topic:
-            embed.add_field(name="Topic",  value=channel.topic[:200],                inline=False)
-        embed.set_footer(text=f"Requested by {ctx.author}", icon_url=ctx.author.display_avatar.url)
+            embed.add_field(name="Topic", value=channel.topic[:200], inline=False)
         await ctx.send(embed=embed)
