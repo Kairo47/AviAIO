@@ -1,0 +1,15 @@
+venv/
+.pythonlibs/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.local/
+.agents/
+.config/
+.git/
+*.log
+bot.zip
+attached_assets/
+replit.nix
+.replit
