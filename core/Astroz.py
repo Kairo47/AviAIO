@@ -105,18 +105,6 @@ class Astroz(commands.AutoShardedBot):
 
                 
 
-    async def on_message_edit(self, before, after):
-        ctx: Context = await self.get_context(after, cls=Context)
-        if before.content != after.content:
-            if after.guild is None or after.author.bot:
-                return
-            if ctx.command is None:
-                return
-            if type(ctx.channel) == "public_thread":
-                return
-            await self.invoke(ctx)
-        else:
-            return
 
 
 
