@@ -1,5 +1,6 @@
 import os
 from core.Astroz import Astroz
+from keep_alive import keep_alive
 import asyncio
 import jishaku, cogs
 import discord
@@ -33,4 +34,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    keep_alive()
     asyncio.run(main())
